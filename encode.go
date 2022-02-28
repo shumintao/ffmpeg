@@ -27,10 +27,10 @@ var (
 	DefaultEncodeCRF   = 21
 	MinimumEncodeCRF   = 16
 	MaximumEncodeCRF   = 30
-	DefaultCaptureTime = 1800			  // 30 minute
-	MaximumCaptureTime = 7200             // 2 hours max.
+	DefaultCaptureTime = 1800 // 30 minute
+	MaximumCaptureTime = 7200 // 2 hours max.
 	// Deprecated: time to controle,don't need size.
-	DefaultCaptureSize = int64(2500000)   // 2.5MB default (roughly 5-10 seconds)
+	DefaultCaptureSize = int64(2500000) // 2.5MB default (roughly 5-10 seconds)
 	// Deprecated: time to controle,don't need size.
 	MaximumCaptureSize = int64(104857600) // 100MB max.
 	DefaultFFmpegPath  = "/usr/local/bin/ffmpeg"
@@ -195,12 +195,12 @@ func (e *Encoder) getVideoHandle(input, output, title string) (string, *exec.Cmd
 	//	arg = append(arg, "-fs", strconv.FormatInt(e.config.Size, 10))
 	//}
 
-	if e.config.Time > 0 {  // set capture time
+	if e.config.Time > 0 { // set capture time
 		arg = append(arg, "-t", strconv.Itoa(e.config.Time))
 	}
 
-	if !strings.Contains(input,"rtmp") {
-		arg = append(arg,	"-rtsp_transport", "tcp")
+	if !strings.Contains(input, "rtmp") {
+		arg = append(arg, "-rtsp_transport", "tcp")
 	}
 
 	if !e.config.Copy {
@@ -263,7 +263,7 @@ func (e *Encoder) SaveVideo(input, output, title string) (string, string, error)
 	var out bytes.Buffer
 	cmd.Stderr, cmd.Stdout = &out, &out
 
-	log.Printf("start time: %s \n",time.Now())
+	log.Printf("start time: %s \n", time.Now())
 	if err := cmd.Start(); err != nil {
 		return cmdStr, strings.TrimSpace(out.String()), fmt.Errorf("subcommand failed: %w", err)
 	}
@@ -271,7 +271,7 @@ func (e *Encoder) SaveVideo(input, output, title string) (string, string, error)
 	if err := cmd.Wait(); err != nil {
 		return cmdStr, strings.TrimSpace(out.String()), fmt.Errorf("subcommand failed: %w", err)
 	}
-	log.Printf("end time: %s \n",time.Now())
+	log.Printf("end time: %s \n", time.Now())
 	return cmdStr, strings.TrimSpace(out.String()), nil
 }
 
