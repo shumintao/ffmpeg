@@ -5,10 +5,8 @@ package ffmpeg
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
-	"log"
 	"os/exec"
 	"path/filepath"
 	"strconv"
@@ -189,7 +187,7 @@ func (e *Encoder) getVideoHandle(input, output, title string) (string, *exec.Cmd
 		"-y", "-map", "0",
 	}
 
-	if e.config.Size > 0 {
+	if e.config.Size != DefaultCaptureSize {
 		arg = append(arg, "-fs", strconv.FormatInt(e.config.Size, 10))
 	}
 
@@ -244,7 +242,7 @@ func (e *Encoder) GetVideo(input, title string) (string, io.ReadCloser, error) {
 // SaveVideo saves a video snippet to a file.
 // Input must be an RTSP URL and output must be a file path. It will be overwritten.
 // Returns command used, command output and error or nil.
-func (e *Encoder) SaveVideo(input, output, title string,ctx context.Context) (string, string, error) {
+func (e *Encoder) SaveVideo(input, output, title string) (string, string, error) {
 	if input == "" {
 		return "", "", ErrorInvalidInput
 	} else if output == "" || output == "-" {
@@ -259,11 +257,6 @@ func (e *Encoder) SaveVideo(input, output, title string,ctx context.Context) (st
 
 	if err := cmd.Start(); err != nil {
 		return cmdStr, strings.TrimSpace(out.String()), fmt.Errorf("subcommand failed: %w", err)
-	}
-
-	select {
-	case <- ctx.Done():
-		log.Printf("the time is up, the program exits")
 	}
 
 	if err := cmd.Wait(); err != nil {
