@@ -29,7 +29,9 @@ var (
 	MaximumEncodeCRF   = 30
 	DefaultCaptureTime = 1800			  // 30 minute
 	MaximumCaptureTime = 7200             // 2 hours max.
+	// Deprecated: time to controle,don't need size.
 	DefaultCaptureSize = int64(2500000)   // 2.5MB default (roughly 5-10 seconds)
+	// Deprecated: time to controle,don't need size.
 	MaximumCaptureSize = int64(104857600) // 100MB max.
 	DefaultFFmpegPath  = "/usr/local/bin/ffmpeg"
 	DefaultProfile     = "main"
@@ -189,7 +191,7 @@ func (e *Encoder) getVideoHandle(input, output, title string) (string, *exec.Cmd
 		"-y", "-map", "0",
 	}
 
-	// PodSpacePrefix: there is time control without video size control.
+	// Deprecated: there is time control without video size control.
 	//if e.config.Size > 0 {  //  default 2.5M
 	//	arg = append(arg, "-fs", strconv.FormatInt(e.config.Size, 10))
 	//}
@@ -315,7 +317,7 @@ func (e *Encoder) fixValues() {
 		e.config.Time = MaximumCaptureTime
 	}
 
-	// PodSpacePrefix: there is time control without video size control.
+	// Deprecated: there is time control without video size control.
 	if e.config.Size == 0 {
 		e.config.Size = DefaultCaptureSize
 	} else if e.config.Size > MaximumCaptureSize {
