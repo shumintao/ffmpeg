@@ -5,6 +5,7 @@ package ffmpeg
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -243,7 +244,7 @@ func (e *Encoder) GetVideo(input, title string) (string, io.ReadCloser, error) {
 // SaveVideo saves a video snippet to a file.
 // Input must be an RTSP URL and output must be a file path. It will be overwritten.
 // Returns command used, command output and error or nil.
-func (e *Encoder) SaveVideo(input, output, title string,closeCh <- chan struct{}) (string, string, error) {
+func (e *Encoder) SaveVideo(input, output, title string,ctx context.Context) (string, string, error) {
 	if input == "" {
 		return "", "", ErrorInvalidInput
 	} else if output == "" || output == "-" {
@@ -261,7 +262,7 @@ func (e *Encoder) SaveVideo(input, output, title string,closeCh <- chan struct{}
 	}
 
 	select {
-	case <- closeCh:
+	case <- ctx.Done():
 		log.Printf("the time is up, the program exits")
 	}
 
