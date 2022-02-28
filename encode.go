@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os/exec"
 	"path/filepath"
 	"strconv"
@@ -242,7 +243,7 @@ func (e *Encoder) GetVideo(input, title string) (string, io.ReadCloser, error) {
 // SaveVideo saves a video snippet to a file.
 // Input must be an RTSP URL and output must be a file path. It will be overwritten.
 // Returns command used, command output and error or nil.
-func (e *Encoder) SaveVideo(input, output, title string) (string, string, error) {
+func (e *Encoder) SaveVideo(input, output, title string,closeCh <- chan struct{}) (string, string, error) {
 	if input == "" {
 		return "", "", ErrorInvalidInput
 	} else if output == "" || output == "-" {
@@ -257,7 +258,14 @@ func (e *Encoder) SaveVideo(input, output, title string) (string, string, error)
 
 	if err := cmd.Start(); err != nil {
 		return cmdStr, strings.TrimSpace(out.String()), fmt.Errorf("subcommand failed: %w", err)
-	} else if err := cmd.Wait(); err != nil {
+	}
+
+	select {
+	case <- closeCh:
+		log.Printf("the time is up, the program exits")
+	}
+
+	if err := cmd.Wait(); err != nil {
 		return cmdStr, strings.TrimSpace(out.String()), fmt.Errorf("subcommand failed: %w", err)
 	}
 
