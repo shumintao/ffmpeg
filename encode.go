@@ -7,10 +7,12 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Default, Maximum and Minimum Values for encoder configuration. Change these if your needs differ.
@@ -25,8 +27,8 @@ var (
 	DefaultEncodeCRF   = 21
 	MinimumEncodeCRF   = 16
 	MaximumEncodeCRF   = 30
-	DefaultCaptureTime = 15
-	MaximumCaptureTime = 1200             // 10 minute max.
+	DefaultCaptureTime = 1800			  // 30 minute
+	MaximumCaptureTime = 7200             // 2 hours max.
 	DefaultCaptureSize = int64(2500000)   // 2.5MB default (roughly 5-10 seconds)
 	MaximumCaptureSize = int64(104857600) // 100MB max.
 	DefaultFFmpegPath  = "/usr/local/bin/ffmpeg"
@@ -187,11 +189,12 @@ func (e *Encoder) getVideoHandle(input, output, title string) (string, *exec.Cmd
 		"-y", "-map", "0",
 	}
 
-	if e.config.Size != DefaultCaptureSize {
-		arg = append(arg, "-fs", strconv.FormatInt(e.config.Size, 10))
-	}
+	// PodSpacePrefix: there is time control without video size control.
+	//if e.config.Size > 0 {  //  default 2.5M
+	//	arg = append(arg, "-fs", strconv.FormatInt(e.config.Size, 10))
+	//}
 
-	if e.config.Time > 0 {
+	if e.config.Time > 0 {  // set capture time
 		arg = append(arg, "-t", strconv.Itoa(e.config.Time))
 	}
 
@@ -255,6 +258,7 @@ func (e *Encoder) SaveVideo(input, output, title string) (string, string, error)
 	var out bytes.Buffer
 	cmd.Stderr, cmd.Stdout = &out, &out
 
+	log.Printf("start time: %s \n",time.Now())
 	if err := cmd.Start(); err != nil {
 		return cmdStr, strings.TrimSpace(out.String()), fmt.Errorf("subcommand failed: %w", err)
 	}
@@ -262,7 +266,7 @@ func (e *Encoder) SaveVideo(input, output, title string) (string, string, error)
 	if err := cmd.Wait(); err != nil {
 		return cmdStr, strings.TrimSpace(out.String()), fmt.Errorf("subcommand failed: %w", err)
 	}
-
+	log.Printf("end time: %s \n",time.Now())
 	return cmdStr, strings.TrimSpace(out.String()), nil
 }
 
@@ -311,6 +315,7 @@ func (e *Encoder) fixValues() {
 		e.config.Time = MaximumCaptureTime
 	}
 
+	// PodSpacePrefix: there is time control without video size control.
 	if e.config.Size == 0 {
 		e.config.Size = DefaultCaptureSize
 	} else if e.config.Size > MaximumCaptureSize {
