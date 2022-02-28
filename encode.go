@@ -184,7 +184,6 @@ func (e *Encoder) getVideoHandle(input, output, title string) (string, *exec.Cmd
 	arg := []string{
 		e.config.FFMPEG,
 		"-v", "16", // log level
-		"-rtsp_transport", "tcp",
 		"-i", input,
 		"-f", "mov",
 		"-metadata", `title="` + title + `"`,
@@ -198,6 +197,10 @@ func (e *Encoder) getVideoHandle(input, output, title string) (string, *exec.Cmd
 
 	if e.config.Time > 0 {  // set capture time
 		arg = append(arg, "-t", strconv.Itoa(e.config.Time))
+	}
+
+	if !strings.Contains(input,"rtmp") {
+		arg = append(arg,	"-rtsp_transport", "tcp")
 	}
 
 	if !e.config.Copy {
